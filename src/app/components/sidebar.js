@@ -25,28 +25,28 @@ export default function Sidebar() {
         <SidebarItem
           icon={<FaHome />}
           label="Home"
-          onClick={() => router.push("/")} // Navigate to the home page
+          onClick={() => router.push("/dashboard")} // Navigate to the home page
         />
 
         {/* Profile Link */}
         <SidebarItem
           icon={<FaUser />}
           label="Profile"
-          onClick={() => router.push("/profile")} // Navigate to the profile page
+          onClick={() => router.push("/dashboard/profile")} // Navigate to the profile page
         />
 
         {/* Meetings Link */}
         <SidebarItem
           icon={<FaCalendarAlt />}
           label="Meetings"
-          onClick={() => router.push("/meetings")} // Navigate to the meetings page
+          onClick={() => router.push("/dashboard/meetings")} // Navigate to the meetings page
         />
 
         {/* Settings Link */}
         <SidebarItem
           icon={<FaCog />}
           label="Settings"
-          onClick={() => router.push("/settings")} // Navigate to the settings page
+          onClick={() => router.push("/dashboard/settings")} // Navigate to the settings page
         />
 
         {/* Logout Button */}
