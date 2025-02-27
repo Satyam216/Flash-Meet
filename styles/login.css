@@ -1,0 +1,71 @@
+/* styles/login.css */
+.login-container {
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  background: #1e1e2e;
+}
+
+.login-box {
+  background: #2a2a3a;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  width: 320px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.subtitle {
+  color: #bbb;
+  margin-bottom: 1rem;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: #444;
+  color: white;
+}
+
+.btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  background: #007bff;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.google-btn {
+  background: #db4437;
+}
+
+.or-text {
+  margin: 10px 0;
+  color: #aaa;
+}
+
+.signup-link {
+  margin-top: 10px;
+  color: #bbb;
+}
+
+.signup-link a {
+  color: #007bff;
+  text-decoration: none;
+}
