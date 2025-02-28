@@ -25,47 +25,76 @@
 .subtitle {
   color: #bbb;
   margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.error {
+  color: #ff4d4d;
+  font-size: 14px;
+  margin-bottom: 10px;
 }
 
 .login-form input {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
   border-radius: 8px;
   border: none;
   outline: none;
   background: #444;
   color: white;
+  font-size: 1rem;
 }
 
 .btn {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-top: 10px;
   background: #007bff;
   border: none;
   color: white;
   font-weight: bold;
+  font-size: 1rem;
   cursor: pointer;
   border-radius: 8px;
-  transition: 0.3s;
+  transition: background 0.3s ease-in-out;
+}
+
+.btn:hover {
+  background: #0056b3;
 }
 
 .google-btn {
   background: #db4437;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.google-btn:hover {
+  background: #b83227;
 }
 
 .or-text {
-  margin: 10px 0;
+  margin: 15px 0;
   color: #aaa;
+  font-size: 14px;
 }
 
 .signup-link {
-  margin-top: 10px;
+  margin-top: 12px;
   color: #bbb;
+  font-size: 14px;
 }
 
-.signup-link a {
+.signup-link span {
   color: #007bff;
   text-decoration: none;
+  font-weight: bold;
+  pointer-events: auto;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
 }

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../lib/firebaseConfig"; // Make sure the path is correct
 import { useRouter } from "next/navigation";
-import "../../styles/login.css"; // Import CSS file
+import { FcGoogle } from "react-icons/fc"; // Google icon
 
 export default function Login() {
   const router = useRouter();
@@ -32,15 +32,20 @@ export default function Login() {
     }
   };
 
+  // Handle navigation to the signup page
+  const handleSignUpNavigation = () => {
+    router.push("/signup");
+  };
+
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h1 className="title">Flash Meet</h1>
-        <h2 className="subtitle">Login</h2>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
+      <div className="bg-gray-800 text-white p-8 rounded-xl shadow-lg w-96 animate-fadeIn">
+        <h1 className="text-3xl font-bold text-center mb-2">Flash Meet</h1>
+        <h2 className="text-xl text-gray-400 text-center mb-6">Login</h2>
 
-        {error && <p className="error">{error}</p>}
+        {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
 
-        <form onSubmit={handleEmailSignIn} className="login-form">
+        <form onSubmit={handleEmailSignIn} className="space-y-4">
           <input
             type="email"
             name="email"
@@ -48,6 +53,7 @@ export default function Login() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
             type="password"
@@ -56,18 +62,33 @@ export default function Login() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <button type="submit" className="btn">Sign in with Email</button>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition duration-300"
+          >
+            Sign in with Email
+          </button>
         </form>
 
-        <p className="or-text">OR</p>
+        <p className="text-gray-400 text-center my-4">OR</p>
 
-        <button className="btn google-btn" onClick={handleGoogleSignIn}>
-          Sign in with Google
+        <button
+          onClick={handleGoogleSignIn}
+          className="w-full flex items-center justify-center bg-white hover:bg-gray-100 text-gray-700 font-semibold py-2 rounded-lg transition duration-300"
+        >
+          <FcGoogle className="mr-2" /> Sign in with Google
         </button>
 
-        <p className="signup-link">
-          Don't have an account? <a href="/signup">Sign Up</a>
+        <p className="text-gray-400 text-center mt-6">
+          Don't have an account?{" "}
+          <span
+            className="cursor-pointer text-blue-500 hover:underline"
+            onClick={handleSignUpNavigation}
+          >
+            Sign Up
+          </span>
         </p>
       </div>
     </div>
