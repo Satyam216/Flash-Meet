@@ -1,9 +1,10 @@
 "use client";
 import React, { useState } from "react";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../lib/firebaseConfig"; // Make sure the path is correct
+import { auth, googleProvider, githubProvider } from "../lib/firebaseConfig"; // Import GitHub provider
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc"; // Google icon
+import { FaGithub } from "react-icons/fa"; // GitHub icon
 
 export default function Login() {
   const router = useRouter();
@@ -29,6 +30,17 @@ export default function Login() {
       router.push("/dashboard"); // Redirect after login
     } catch (err) {
       setError("Login Failed! Try Again.");
+    }
+  };
+
+  // Handle Login with GitHub
+  const handleGitHubSignIn = async () => {
+    try {
+      await signInWithPopup(auth, githubProvider);
+      router.push("/dashboard"); // Redirect after login
+    } catch (err) {
+      console.error("GitHub Login Error:", err);
+      setError("GitHub Login Failed! Try Again.");
     }
   };
 
@@ -68,17 +80,26 @@ export default function Login() {
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition duration-300"
           >
-            Sign in with Email
+            Sign in
           </button>
         </form>
 
         <p className="text-gray-400 text-center my-4">OR</p>
 
+        {/* Google Login Button */}
         <button
           onClick={handleGoogleSignIn}
-          className="w-full flex items-center justify-center bg-white hover:bg-gray-100 text-gray-700 font-semibold py-2 rounded-lg transition duration-300"
+          className="w-full flex items-center justify-center bg-white hover:bg-gray-100 text-gray-700 font-semibold py-2 rounded-lg transition duration-300 mb-4"
         >
           <FcGoogle className="mr-2" /> Sign in with Google
+        </button>
+
+        {/* GitHub Login Button */}
+        <button
+          onClick={handleGitHubSignIn}
+          className="w-full flex items-center justify-center bg-gray-900 hover:bg-gray-700 text-white font-semibold py-2 rounded-lg transition duration-300"
+        >
+          <FaGithub className="mr-2" /> Sign in with GitHub
         </button>
 
         <p className="text-gray-400 text-center mt-6">
