@@ -8,33 +8,47 @@ export default function Profile() {
   const user = auth.currentUser;
 
   const [profile, setProfile] = useState({
+    email: user?.email || "",
     name: "",
     occupation: "",
     interests: "",
   });
   const [editMode, setEditMode] = useState(false);
 
+  // 🔹 Profile Fetch Karega Jab Component Load Hoga
   useEffect(() => {
-    if (user) {
-      axios.get(`http://localhost:5000/api/profile/${user.uid}`).then((res) => {
-        if (res.data.success) setProfile(res.data.user);
-      });
+    if (user?.email) {
+      axios
+        .get(`http://localhost:5000/api/profile?email=${user.email}`)
+        .then((res) => {
+          if (res.data.profile) {
+            setProfile({
+              email: res.data.profile.email,
+              name: res.data.profile.name,
+              occupation: res.data.profile.occupation,
+              interests: res.data.profile.interests.join(", "), // Array to String conversion
+            });
+          }
+        })
+        .catch((err) => console.error("Error fetching profile:", err));
     }
   }, [user]);
 
+  // 🔹 Profile Create or Update
   const handleUpdate = async () => {
     try {
-      await axios.post("http://localhost:5000/api/profile", {
-        uid: user.uid,
-        name: profile.name,
-        occupation: profile.occupation,
-        interests: profile.interests.split(","),
+      const response = await axios.post("http://localhost:5000/api/profile", {
+        email: profile.email, // Backend ke hisaab se email bhejna zaroori hai
+        name: profile.name.trim(),
+        occupation: profile.occupation.trim(),
+        interests: profile.interests.split(",").map((i) => i.trim()), // String to Array conversion
       });
-      alert("Profile updated!");
+
+      alert(response.data.message || "Profile updated successfully!");
       setEditMode(false);
     } catch (error) {
-      console.error(error);
-      alert("Error updating profile");
+      console.error("Error updating profile:", error.response?.data || error.message);
+      alert(error.response?.data?.error || "Failed to update profile!");
     }
   };
 
@@ -43,6 +57,10 @@ export default function Profile() {
       <div className="bg-gray-800 text-white p-8 rounded-xl shadow-lg w-96 text-center">
         
         <div className="space-y-4">
+          {/* 🔹 Email (Non-Editable) */}
+          <p className="text-sm text-gray-400">Email: {profile.email}</p>
+
+          {/* 🔹 Name */}
           {editMode ? (
             <input
               type="text"
@@ -55,6 +73,7 @@ export default function Profile() {
             <h2 className="text-2xl font-bold text-indigo-400">{profile.name || "Your Name"}</h2>
           )}
 
+          {/* 🔹 Occupation */}
           {editMode ? (
             <input
               type="text"
@@ -67,6 +86,7 @@ export default function Profile() {
             <p className="text-lg text-gray-400">{profile.occupation || "Your Occupation"}</p>
           )}
 
+          {/* 🔹 Interests */}
           {editMode ? (
             <input
               type="text"
