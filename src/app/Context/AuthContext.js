@@ -3,15 +3,14 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "../lib/firebaseConfig"; // Ensure Firebase is initialized
 
-// Create Auth Context
-const AuthContext = createContext();
+// 🔹 Create Context
+const AuthContext = createContext(null);
 
-// Auth Provider Component
+// 🔹 Auth Provider
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Listen to auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -20,7 +19,6 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // Login Function
   const login = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -31,7 +29,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout Function
   const logout = async () => {
     await signOut(auth);
     setUser(null);
@@ -44,5 +41,11 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Custom Hook to use Auth
-export const useAuth = () => useContext(AuthContext);
+// 🔹 Custom Hook to Access Context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
