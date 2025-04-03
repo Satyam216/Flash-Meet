@@ -37,7 +37,7 @@ export default function SignUp() {
       const user = userCredential.user;
 
       // Send user info to backend
-      await axios.post("http://localhost:5000/api/users", {
+      await axios.post("http://localhost:5000/api/profile", {
         name: user.displayName || "No Name",
         email: user.email,
         provider: "email",

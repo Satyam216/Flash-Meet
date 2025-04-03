@@ -12,31 +12,56 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  // Handle Login with Email & Password
+  // ✅ Function to Save User in MongoDB
+  const saveUserToDB = async (user) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: user.uid, // Firebase UID
+          name: user.displayName || "No Name",
+          email: user.email || "No Email",
+          profilePicture: user.photoURL || "",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save user to database");
+      }
+    } catch (err) {
+      console.error("Database Save Error:", err);
+    }
+  };
+
+  // ✅ Handle Email & Password Login
   const handleEmailSignIn = async (e) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      await saveUserToDB(result.user); // Save user to MongoDB
       router.push("/dashboard"); // Redirect after login
     } catch (err) {
       setError("Invalid email or password. Please try again.");
     }
   };
 
-  // Handle Login with Google
+  // ✅ Handle Google Login
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      await saveUserToDB(result.user); // Save user to MongoDB
       router.push("/dashboard"); // Redirect after login
     } catch (err) {
-      setError("Login Failed! Try Again.");
+      setError("Google Login Failed! Try Again.");
     }
   };
 
-  // Handle Login with GitHub
+  // ✅ Handle GitHub Login
   const handleGitHubSignIn = async () => {
     try {
-      await signInWithPopup(auth, githubProvider);
+      const result = await signInWithPopup(auth, githubProvider);
+      await saveUserToDB(result.user); // Save user to MongoDB
       router.push("/dashboard"); // Redirect after login
     } catch (err) {
       console.error("GitHub Login Error:", err);

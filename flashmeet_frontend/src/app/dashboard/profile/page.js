@@ -8,25 +8,30 @@ export default function Profile() {
   const user = auth.currentUser;
 
   const [profile, setProfile] = useState({
+    uid: user?.uid || "",
     email: user?.email || "",
     name: "",
+    profilePicture: user?.photoURL || "",
     occupation: "",
     interests: "",
   });
+
   const [editMode, setEditMode] = useState(false);
 
   // 🔹 Profile Fetch Karega Jab Component Load Hoga
   useEffect(() => {
-    if (user?.email) {
+    if (user?.uid) {
       axios
-        .get(`http://localhost:5000/api/profile?email=${user.email}`)
+        .get(`http://localhost:5000/api/profile?uid=${user.uid}`)
         .then((res) => {
           if (res.data.profile) {
             setProfile({
+              uid: res.data.profile.uid,
               email: res.data.profile.email,
               name: res.data.profile.name,
-              occupation: res.data.profile.occupation,
-              interests: res.data.profile.interests.join(", "), // Array to String conversion
+              profilePicture: res.data.profile.profilePicture || user?.photoURL || "",
+              occupation: res.data.profile.occupation || "",
+              interests: res.data.profile.interests?.join(", ") || "",
             });
           }
         })
@@ -38,8 +43,10 @@ export default function Profile() {
   const handleUpdate = async () => {
     try {
       const response = await axios.post("http://localhost:5000/api/profile", {
-        email: profile.email, // Backend ke hisaab se email bhejna zaroori hai
+        uid: profile.uid, // ✅ Firebase UID send karna zaroori hai
+        email: profile.email, // ✅ Email bhi send hoga (immutable hai)
         name: profile.name.trim(),
+        profilePicture: profile.profilePicture,
         occupation: profile.occupation.trim(),
         interests: profile.interests.split(",").map((i) => i.trim()), // String to Array conversion
       });
@@ -53,9 +60,18 @@ export default function Profile() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-white">
+    <div className="flex justify-center items-center h-screen bg-gray-100">
       <div className="bg-gray-800 text-white p-8 rounded-xl shadow-lg w-96 text-center">
         
+        {/* 🔹 Profile Picture */}
+        <div className="flex justify-center">
+          <img
+            src={profile.profilePicture || "/default-avatar.png"}
+            alt="Profile"
+            className="w-24 h-24 rounded-full border-2 border-blue-500 mb-4"
+          />
+        </div>
+
         <div className="space-y-4">
           {/* 🔹 Email (Non-Editable) */}
           <p className="text-sm text-gray-400">Email: {profile.email}</p>
@@ -100,6 +116,7 @@ export default function Profile() {
           )}
         </div>
 
+        {/* 🔹 Edit & Save Button */}
         <button
           onClick={editMode ? handleUpdate : () => setEditMode(true)}
           className="mt-6 px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
