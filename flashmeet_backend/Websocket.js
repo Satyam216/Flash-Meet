@@ -1,87 +1,79 @@
 const WebSocket = require("ws");
-const Room = require("./models/Room");
-const WaitingUser = require("./models/waitingUser");
+const http = require("http");
 
-const activeUsers = new Map();
-const waitingQueue = [];
+const wss = new WebSocket.Server({ noServer: true });
+const waitingUsers = [];
 
 function setupWebSocket(server) {
-    const wss = new WebSocket.Server({ server });
+    server.on("upgrade", (request, socket, head) => {
+        const { searchParams } = new URL(request.url, "http://localhost");
 
-    wss.on("connection", async (ws, req) => {
-        const urlParams = new URLSearchParams(req.url.split("?")[1]);
-        const userId = urlParams.get("userId");
+        const userId = searchParams.get("userId");
+        const interests = searchParams.get("interests")?.split(",") || [];
 
         if (!userId) {
-            console.log("Invalid connection: No user ID");
-            ws.close();
+            socket.destroy();
             return;
         }
 
-        activeUsers.set(userId, ws);
-        console.log(`User connected: ${userId}`);
+        wss.handleUpgrade(request, socket, head, (ws) => {
+            ws.userId = userId;
+            ws.interests = interests;
+            ws.isAlive = true;
+            ws.roomId = null;
 
-        waitingQueue.push(userId);
-        matchUsers();
-
-        ws.on("message", async (message) => {
-            const data = JSON.parse(message);
-            if (data.type === "chat_message") {
-                const { roomId, text } = data;
-                broadcastMessage(roomId, userId, text);
-            }
-        });
-
-        ws.on("close", () => {
-            console.log(`User disconnected: ${userId}`);
-            activeUsers.delete(userId);
-            removeFromQueue(userId);
+            matchUser(ws);
         });
     });
 }
 
-async function matchUsers() {
-    while (waitingQueue.length >= 2) {
-        const user1 = waitingQueue.shift();
-        const user2 = waitingQueue.shift();
+function matchUser(ws) {
+    console.log(`🔗 User ${ws.userId} connected with interests: ${ws.interests}`);
 
-        const ws1 = activeUsers.get(user1);
-        const ws2 = activeUsers.get(user2);
+    for (let i = 0; i < waitingUsers.length; i++) {
+        const otherUser = waitingUsers[i];
 
-        if (ws1 && ws2) {
-            let room = await Room.findOne({ users: { $all: [user1, user2] } });
+        // ✅ Match based on at least one common interest
+        const commonInterests = ws.interests.filter(interest => otherUser.interests.includes(interest));
 
-            if (!room) {
-                const roomId = `room-${user1}-${user2}`;
-                room = new Room({ roomId, users: [user1, user2] });
-                await room.save();
+        if (commonInterests.length > 0) {
+            // 🛑 Remove matched user from waiting list
+            waitingUsers.splice(i, 1);
+
+            // ✅ Use existing room ID if the other user was waiting, otherwise create a new one
+            const roomId = otherUser.roomId || `room-${Date.now()}`;
+            ws.roomId = roomId;
+            otherUser.roomId = roomId;
+
+            // 📢 Notify both users about the match
+            try {
+                ws.send(JSON.stringify({ type: "match_found", roomId }));
+                otherUser.send(JSON.stringify({ type: "match_found", roomId }));
+                console.log(`✅ Matched users ${ws.userId} and ${otherUser.userId} in Room: ${roomId}`);
+            } catch (error) {
+                console.error("Error sending match data:", error);
             }
 
-            ws1.send(JSON.stringify({ type: "match_found", roomId: room.roomId, partnerId: user2 }));
-            ws2.send(JSON.stringify({ type: "match_found", roomId: room.roomId, partnerId: user1 }));
+            // ⏳ End session in 5 minutes
+            setTimeout(() => {
+                try {
+                    ws.send(JSON.stringify({ type: "session_ended" }));
+                    otherUser.send(JSON.stringify({ type: "session_ended" }));
+                    ws.close();
+                    otherUser.close();
+                } catch (e) {
+                    console.error("Error ending session:", e);
+                }
+            }, 5 * 60 * 1000);
 
-            console.log(`Matched users: ${user1} & ${user2} in room ${room.roomId}`);
+            return;
         }
     }
-}
 
-function broadcastMessage(roomId, senderId, text) {
-    Room.findOne({ roomId }).then((room) => {
-        if (!room) return;
-
-        room.users.forEach((user) => {
-            if (activeUsers.has(user)) {
-                activeUsers.get(user).send(
-                    JSON.stringify({ type: "chat_message", senderId, text })
-                );
-            }
-        });
-    });
-}
-
-function removeFromQueue(userId) {
-    const index = waitingQueue.indexOf(userId);
-    if (index !== -1) waitingQueue.splice(index, 1);
+    // ❌ No match found, add user to waiting list
+    ws.roomId = `room-${Date.now()}`;
+    waitingUsers.push(ws);
+    console.log(`🕒 User ${ws.userId} added to waiting queue with Room: ${ws.roomId}`);
 }
 
 module.exports = setupWebSocket;

@@ -44,7 +44,7 @@ router.post("/profile", async (req, res) => {
   }
 });
 
-// 🔹 Get Single Profile API (GET by `uid` or `email`)
+// 🔹 Get Single Profile API (GET by uid or email)
 router.get("/profile", async (req, res) => {
   try {
     const { uid, email } = req.query;
@@ -53,7 +53,7 @@ router.get("/profile", async (req, res) => {
       return res.status(400).json({ error: "UID or Email is required to fetch profile" });
     }
 
-    // ✅ `uid` ko priority di gayi, agar `uid` nahi hai to `email` se search hoga.
+    // ✅ uid ko priority di gayi, agar uid nahi hai to email se search hoga.
     const profile = await Profile.findOne(uid ? { uid } : { email });
 
     if (!profile) {
